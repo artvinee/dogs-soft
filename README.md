@@ -1,4 +1,4 @@
-# Dogs checker
+# Dogs checker by artvine.
 It is based on software from https://github.com/Axcent-ape, so it is fully compatible with its sessions (copy all files from sessions to sessions of my software).
 
 In config.py we write necessary delays and referral code (it is better to keep mine).
