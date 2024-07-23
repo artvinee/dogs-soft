@@ -91,3 +91,28 @@ async def stats():
     df.to_csv(path, index=False, encoding='utf-8-sig')
 
     logger.success(f"Saved statistics to {path}")
+
+
+async def inf_stats():
+    while True:
+        accounts = await Accounts().get_accounts()
+
+        tasks = []
+        for thread, account in enumerate(accounts):
+            session_name, phone_number, proxy = account.values()
+            tasks.append(asyncio.create_task(
+                Dog(session_name=session_name, phone_number=phone_number, thread=thread, proxy=proxy).stats()))
+
+        data = await asyncio.gather(*tasks)
+
+        path = f"statistics/statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv"
+        columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Proxy (login:password@ip:port)']
+
+        if not os.path.exists('statistics'): os.mkdir('statistics')
+        df = pd.DataFrame(data, columns=columns)
+        df.to_csv(path, index=False, encoding='utf-8-sig')
+
+        logger.success(f"Saved statistics to {path}")
+        sleep = 60 * 60 * 24 + random.randint(100, 450)
+        logger.info(f"Sleep {sleep} seconds..")
+        await asyncio.sleep(sleep)

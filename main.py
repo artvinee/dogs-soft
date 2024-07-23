@@ -1,7 +1,7 @@
 import random
 
 from utils.core.telegram import Accounts
-from utils.starter import start, stats
+from utils.starter import start, stats, inf_stats
 import asyncio
 from data import config
 from itertools import zip_longest
@@ -11,7 +11,7 @@ import os
 
 async def main():
     print("Dogs soft by artvine.\n")
-    action = int(input("Select action:\n0. About soft\n1. Start soft\n2. Get statistics\n3. Create sessions\n\n> "))
+    action = int(input("Select action:\n0. About soft\n1. Start soft\n2. Get statistics\n3. Get statistics every day (claim daily reward)\n4. Create sessions\n\n> "))
 
     if action == 0:
         print(config.SOFT_INFO)
@@ -28,11 +28,14 @@ async def main():
             with open("sessions/accounts.json", 'w') as f:
                 f.write("[]")
 
-    if action == 3:
+    if action == 4:
         await Accounts().create_sessions()
 
     if action == 2:
         await stats()
+
+    if action == 3:
+        await inf_stats()
 
     if action == 1:
         accounts = await Accounts().get_accounts()
