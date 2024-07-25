@@ -5,6 +5,7 @@ In config.py we write necessary delays and referral code (it is better to keep m
 
 UPD 23.07
 Can now collect a stat table every day (collect daily reward)
+
 UPD 25.07
 Can now do tasks
 
