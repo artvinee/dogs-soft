@@ -5,6 +5,8 @@ In config.py we write necessary delays and referral code (it is better to keep m
 
 UPD 23.07
 Can now collect a stat table every day (collect daily reward)
+UPD 25.07
+Can now do tasks
 
 # IMPORTANT:
 (!) All tg accounts need installed username, otherwise the bot just won't let you in and the software will throw errors.
