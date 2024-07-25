@@ -4,8 +4,8 @@ API_HASH = 'abcde1488'
 
 
 DELAYS = {
-    'ACCOUNT': [5, 15],  # delay between connections to accounts (the more accounts, the longer the delay)
-    'REPEAT': [5, 18],
+    'ACCOUNT': [1, 2],  # delay between connections to accounts (the more accounts, the longer the delay)
+    'REPEAT': [1, 2],
     'MAX_ATTEMPTS': 2
 }
 

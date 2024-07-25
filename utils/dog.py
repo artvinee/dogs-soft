@@ -63,7 +63,8 @@ class Dog:
         await self.leaderboard()
         await asyncio.sleep(0.1)
         await self.rewards()
-
+        await asyncio.sleep(0.1)
+        await self.tasks()
         await asyncio.sleep(0.1)
 
         if self.acc_ref_code is not None:
@@ -101,6 +102,28 @@ class Dog:
                 return None, None
         except Exception as e:
             logger.error(f"Join: {e}")
+
+    async def verify(self, task):
+        try:
+            resp = await self.session.post(f'https://api.onetime.dog/tasks/verify?task={task}&user_id={self.id}&reference={self.acc_ref_code}')
+            if resp.status == 200:
+                r = await resp.json()
+                return r['success']
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Verify: {e}")
+
+    async def tasks(self):
+        try:
+            resp = await self.session.get(f'https://api.onetime.dog/tasks?user_id={self.id}&reference={self.acc_ref_code}')
+            if resp.status == 200:
+                r = await resp.json()
+                return r
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Tasks: {e}")
 
     async def frens(self):
         try:
@@ -147,33 +170,16 @@ class Dog:
             logger.error(f"Thread {self.thread} | {self.account} | Session {self.account} invalid")
             await self.logout()
             return None
-        try:
-            json = {
-                "d": "onetime.dog",
-                "n": "pageview",
-                "r": "https://web.telegram.org/",
-                "u": f"{self.full_query}&"
-                     f"tgWebAppThemeParams=%7B%22bg_color%22%3A%22%23212121%22%2C%22button_color"
-                     f"%22%3A%22%238774e1%22%2C%22button_text_color%22%3A%22%23ffffff%22%2C%22hint_color"
-                     f"%22%3A%22%23aaaaaa%22%2C%22link_color%22%3A%22%238774e1%22%2C%22secondary_bg_color"
-                     f"%22%3A%22%23181818%22%2C%22text_color%22%3A%22%23ffffff%22%2C%22header_bg_color"
-                     f"%22%3A%22%23212121%22%2C%22accent_text_color%22%3A%22%238774e1%22%2C%22"
-                     f"section_bg_color%22%3A%22%23212121%22%2C%22section_header_text_color"
-                     f"%22%3A%22%238774e1%22%2C%22subtitle_text_color%22%3A%22%23aaaaaa%22%2C%22"
-                     f"destructive_text_color%22%3A%22%23ff595a%22%7D"
-            }
-            resp = await self.session.post(f"https://plausible.io/api/event", json=json)
-            if resp.status == 202:
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(e)
+        else:
+            return True
 
     async def get_tg_web_data(self):
         try:
             await self.client.connect()
-
+            try:
+                await self.client.join_chat('dogs_community')
+            except:
+                pass
             ref_code = config.REF_CODE
             self.ref_code = ref_code
 

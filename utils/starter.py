@@ -29,7 +29,7 @@ async def task(dog, thread, account):
         for attempt in range(max_retries + 1):
             age, balance = await dog.join()
             if age is not None and balance is not None:
-                logger.success(f"Thread {thread} | {account} | Successfully claimed {balance} tokens. Account is {age} years old.")
+                logger.success(f"Thread {thread} | {account} | Balance: {balance} points. Account is {age} years old.")
                 break
             else:
                 logger.error(f"Thread {thread} | {account} | Failed to check allocation.")
@@ -68,9 +68,47 @@ async def task(dog, thread, account):
                     continue
                 else:
                     break
+        tasks = await dog.tasks()
+        black = [
+            "subscribe-blum",
+            "add-bone-telegram",
+            "subscribe-notcoin",
+            "make-transaction",
+            "send-bone"
+        ]
+        if tasks:
+            for task in tasks:
+                name = task['slug']
+                if name not in black:
+                    reward = task['reward']
+                    completed = task['complete']
+                    for attempt in range(max_retries + 1):
+                        if completed is False:
+                            verify = await dog.verify(name)
+                            if verify is True:
+                                logger.success(f"Thread {thread} | {account} | Task {name} was successfully completed. +{reward} points!")
+                                break
+                            else:
+                                if attempt < max_retries + 1:
+                                    if name == 'invite-frens':
+                                        logger.info(f"Thread {thread} | {account} | Invite task not completed.")
+                                        break
+                                    else:
+                                        logger.error(f"Thread {thread} | {account} | Task {name} was failed.")
+                                    await asyncio.sleep(random.randint(config.DELAYS['REPEAT'][0], config.DELAYS['REPEAT'][1]))
+                                    continue
+                                else:
+                                    logger.error(f"Thread {thread} | {account} | Task {name} was finally failed.")
+                                    break
+                else:
+                    continue
+                await asyncio.sleep(random.uniform(0.5, 1.2))
+        else:
+            logger.error(f"Thread {thread} | {account} | Failed to get tasks.")
         await dog.logout()
     except Exception as e:
         logger.error(f"Thread {thread} | {account} | Error: {e}")
+
 
 async def stats():
     accounts = await Accounts().get_accounts()
