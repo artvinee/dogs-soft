@@ -166,7 +166,7 @@ async def stats():
     data = await asyncio.gather(*tasks)
 
     path = f"statistics/statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv"
-    columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Referrals', 'Proxy (login:password@ip:port)']
+    columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Referrals', 'Wallet', 'Proxy (login:password@ip:port)']
 
     if not os.path.exists('statistics'): os.mkdir('statistics')
     df = pd.DataFrame(data, columns=columns)
@@ -188,8 +188,7 @@ async def inf_stats():
         data = await asyncio.gather(*tasks)
 
         path = f"statistics/statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv"
-        columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Referrals',
-                   'Proxy (login:password@ip:port)']
+        columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Referrals', 'Wallet', 'Proxy (login:password@ip:port)']
 
         if not os.path.exists('statistics'): os.mkdir('statistics')
         df = pd.DataFrame(data, columns=columns)

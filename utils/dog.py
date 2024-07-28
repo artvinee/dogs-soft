@@ -47,6 +47,7 @@ class Dog:
         self.acc_ref_code = None
         self.id = None
         self.name = None
+        self.wallet = None
 
         headers = {'User-Agent': UserAgent(os='android').random}
         self.session = aiohttp.ClientSession(headers=headers, trust_env=True, connector=connector)
@@ -74,7 +75,12 @@ class Dog:
             logger.error(f"Thread {self.thread} | {self.account} | User_id is None")
             referral_link = None
 
-        await asyncio.sleep(random.uniform(5, 7))
+        if self.wallet != '':
+            wallet = 'True'
+        else:
+            wallet = 'False'
+
+        await asyncio.sleep(random.uniform(2, 6))
 
         await self.logout()
 
@@ -85,7 +91,7 @@ class Dog:
 
         proxy = self.proxy.replace('http://', "") if self.proxy is not None else '-'
 
-        return [phone_number, name, balance, age, referral_link, referrals, proxy]
+        return [phone_number, name, balance, age, referral_link, referrals, wallet, proxy]
 
     async def join(self):
         try:
@@ -98,6 +104,7 @@ class Dog:
                 balance = r['balance']
                 self.acc_ref_code = r['reference']
                 self.id = r['telegram_id']
+                self.wallet = r['wallet']
                 return age, balance
             else:
                 return None, None
