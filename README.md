@@ -9,5 +9,13 @@ Can now collect a stat table every day (collect daily reward)
 UPD 25.07
 Can now do tasks
 
+UPD 28.07
+Improved the system of task completion, added task execution on refs (when reaching 5 of them), emoji in nickname and others.
+
+In config.py there is an option to choose: remove emoji after completing tasks, or leave.
+There is also a black list of tasks, which will be supplemented.
+
+I also added more information to the statistics table. Namely checking for the presence of a connected wallet (True / False), as well as the number of refs on the account.
+
 # IMPORTANT:
 (!) All tg accounts need installed username, otherwise the bot just won't let you in and the software will throw errors.
