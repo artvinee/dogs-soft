@@ -46,6 +46,7 @@ class Dog:
 
         self.acc_ref_code = None
         self.id = None
+        self.name = None
 
         headers = {'User-Agent': UserAgent(os='android').random}
         self.session = aiohttp.ClientSession(headers=headers, trust_env=True, connector=connector)
@@ -58,7 +59,7 @@ class Dog:
         age, balance = await self.join()
         await asyncio.sleep(0.1)
 
-        await self.frens()
+        referrals = await self.frens()
         await asyncio.sleep(0.1)
         await self.leaderboard()
         await asyncio.sleep(0.1)
@@ -84,7 +85,7 @@ class Dog:
 
         proxy = self.proxy.replace('http://', "") if self.proxy is not None else '-'
 
-        return [phone_number, name, balance, age, referral_link, proxy]
+        return [phone_number, name, balance, age, referral_link, referrals, proxy]
 
     async def join(self):
         try:
@@ -130,7 +131,9 @@ class Dog:
             data = f"user_id={self.id}&reference={self.acc_ref_code}"
             resp = await self.session.get(f'https://api.onetime.dog/frens?{data}')
             if resp.status == 200:
-                return True
+                r = await resp.json()
+                count = int(r['count'])
+                return count
             else:
                 return False
         except Exception as e:
@@ -173,11 +176,50 @@ class Dog:
         else:
             return True
 
+    async def change_name_with_emoji(self):
+        try:
+            await self.client.connect()
+            me = await self.client.get_me()
+            self.name = me.first_name
+            if "🦴" in self.name:
+                await self.client.disconnect()
+                return True, self.name
+            new_name = self.name + " 🦴"
+            await self.client.update_profile(first_name=new_name)
+            await self.client.disconnect()
+            return True, new_name
+        except Exception as e:
+            logger.error(e)
+            return False, None
+
+    async def revert_name(self):
+        try:
+            await self.client.connect()
+            me = await self.client.get_me()
+
+            current_name = me.first_name
+
+            new_name = re.sub(r'🦴', '', current_name).strip()
+
+            await self.client.update_profile(first_name=new_name)
+            await self.client.disconnect()
+            return True, new_name
+        except Exception as e:
+            logger.error(e)
+
     async def get_tg_web_data(self):
         try:
             await self.client.connect()
             try:
                 await self.client.join_chat('dogs_community')
+            except:
+                pass
+            try:
+                await self.client.join_chat('blumcrypto')
+            except:
+                pass
+            try:
+                await self.client.join_chat('notcoin')
             except:
                 pass
             ref_code = config.REF_CODE

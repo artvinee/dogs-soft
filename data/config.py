@@ -1,6 +1,6 @@
 # api id, hash
-API_ID = 1488
-API_HASH = 'abcde1488'
+API_ID = 
+API_HASH = ''
 
 
 DELAYS = {
@@ -18,12 +18,17 @@ PROXY = {
         }
 }
 
+REMOVE_BONE_AFTER_COMPLETE = True #  remove emoji bone from name after complete task
 REF_CODE = "4Tw4x9U9R1CxClURchOaxQ"
+TASKS_BLACKLIST = [   #  do not change, i'll let you know if i need to make any changes.
+            "make-transaction",
+            "send-bone"
+        ]
 
 # session folder (do not change)
 WORKDIR = "sessions/"
 
 # timeout in seconds for checking accounts on valid
-TIMEOUT = 30
+TIMEOUT = 60
 
 SOFT_INFO = "Dogs soft by https://t.me/artvinee, based on https://t.me/ApeCryptorSoft 's soft"

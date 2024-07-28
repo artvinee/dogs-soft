@@ -25,6 +25,7 @@ async def start(thread: int, session_name: str, phone_number: str, proxy: [str, 
 
 
 async def task(dog, thread, account):
+    global frens
     try:
         for attempt in range(max_retries + 1):
             age, balance = await dog.join()
@@ -40,7 +41,7 @@ async def task(dog, thread, account):
                     break
         for attempt in range(max_retries + 1):
             frens = await dog.frens()
-            if frens is True:
+            if frens is not False:
                 break
             else:
                 if attempt < max_retries + 1:
@@ -69,39 +70,82 @@ async def task(dog, thread, account):
                 else:
                     break
         tasks = await dog.tasks()
-        black = [
-            "subscribe-blum",
-            "add-bone-telegram",
-            "subscribe-notcoin",
-            "make-transaction",
-            "send-bone"
-        ]
+        black = config.TASKS_BLACKLIST
         if tasks:
             for task in tasks:
                 name = task['slug']
                 if name not in black:
                     reward = task['reward']
                     completed = task['complete']
-                    for attempt in range(max_retries + 1):
-                        if completed is False:
-                            verify = await dog.verify(name)
-                            if verify is True:
-                                logger.success(f"Thread {thread} | {account} | Task {name} was successfully completed. +{reward} points!")
-                                break
-                            else:
-                                if attempt < max_retries + 1:
-                                    if name == 'invite-frens':
-                                        logger.info(f"Thread {thread} | {account} | Invite task not completed.")
+                    for attempt in range(1, max_retries + 1):
+                        try:
+                            if completed is False:
+                                if name == 'invite-frens':
+                                    if frens >= 5:
+                                        verify = await dog.verify(name)
+                                        if verify is True:
+                                            logger.success(
+                                                f"Thread {thread} | {account} | Task {name} was successfully completed. +{reward} points!")
+                                            break
+                                        else:
+                                            if attempt < max_retries:
+                                                logger.error(f"Thread {thread} | {account} | Task {name} was failed. Try again..")
+                                                await asyncio.sleep(
+                                                    random.randint(config.DELAYS['REPEAT'][0], config.DELAYS['REPEAT'][1]))
+                                                continue
+                                            else:
+                                                logger.error(
+                                                    f"Thread {thread} | {account} | Task {name} was finally failed.")
+                                                break
+                                    else:
+                                        break
+                                elif name == "add-bone-telegram":
+                                    status, new_name = await dog.change_name_with_emoji()
+                                    await asyncio.sleep(random.uniform(1.5, 2.5))
+                                    if status is True:
+                                        logger.success(
+                                            f"Thread {thread} | {account} | Name was successfully chamged to {new_name}.")
+                                        await asyncio.sleep(random.uniform(1.5, 2.5))
+                                        verify = await dog.verify(name)
+                                        if verify is True:
+                                            logger.success(
+                                                f"Thread {thread} | {account} | Task {name} was successfully completed. +{reward} points!")
+                                            await asyncio.sleep(random.uniform(1.5, 2.5))
+                                            if config.REMOVE_BONE_AFTER_COMPLETE is True:
+                                                status, old_name = await dog.revert_name()
+                                                if status is True:
+                                                    logger.success(
+                                                        f"Thread {thread} | {account} | Name was successfully changed to {old_name}.")
+                                                    break
+                                            break
+                                        else:
+                                            if attempt < max_retries:
+                                                logger.error(f"Thread {thread} | {account} | Task {name} was failed. Try again..")
+                                                await asyncio.sleep(
+                                                    random.randint(config.DELAYS['REPEAT'][0], config.DELAYS['REPEAT'][1]))
+                                                continue
+                                            else:
+                                                logger.error(
+                                                    f"Thread {thread} | {account} | Task {name} was finally failed.")
+                                                break
+                                else:
+                                    verify = await dog.verify(name)
+                                    if verify is True:
+                                        logger.success(
+                                            f"Thread {thread} | {account} | Task {name} was successfully completed. +{reward} points!")
                                         break
                                     else:
-                                        logger.error(f"Thread {thread} | {account} | Task {name} was failed.")
-                                    await asyncio.sleep(random.randint(config.DELAYS['REPEAT'][0], config.DELAYS['REPEAT'][1]))
-                                    continue
-                                else:
-                                    logger.error(f"Thread {thread} | {account} | Task {name} was finally failed.")
-                                    break
-                else:
-                    continue
+                                        if attempt < max_retries:
+                                            logger.error(f"Thread {thread} | {account} | Task {name} was failed. Try again..")
+                                            await asyncio.sleep(
+                                                random.randint(config.DELAYS['REPEAT'][0], config.DELAYS['REPEAT'][1]))
+                                            continue
+                                        else:
+                                            logger.error(f"Thread {thread} | {account} | Task {name} was finally failed.")
+                                            break
+                        except Exception as e:
+                            logger.error(f"Thread {thread} | {account} | {e}")
+                            await dog.revert_name()
                 await asyncio.sleep(random.uniform(0.5, 1.2))
         else:
             logger.error(f"Thread {thread} | {account} | Failed to get tasks.")
@@ -122,7 +166,7 @@ async def stats():
     data = await asyncio.gather(*tasks)
 
     path = f"statistics/statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv"
-    columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Proxy (login:password@ip:port)']
+    columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Referrals', 'Proxy (login:password@ip:port)']
 
     if not os.path.exists('statistics'): os.mkdir('statistics')
     df = pd.DataFrame(data, columns=columns)
@@ -144,7 +188,8 @@ async def inf_stats():
         data = await asyncio.gather(*tasks)
 
         path = f"statistics/statistics_{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv"
-        columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Proxy (login:password@ip:port)']
+        columns = ['Phone number', 'Name', 'Balance', 'Age', 'Referral link', 'Referrals',
+                   'Proxy (login:password@ip:port)']
 
         if not os.path.exists('statistics'): os.mkdir('statistics')
         df = pd.DataFrame(data, columns=columns)
